@@ -17,6 +17,7 @@ public:
     void pop();
     string top();
     bool empty();
+    void display();
 };
 
 class Graph {
@@ -40,8 +41,10 @@ class CrowdControl {
 public:
     void addPersonToStack(string name);
     void removePersonFromStack();
+    void displayCrowdStack();
     void addPersonToQueue(string name);
     void removePersonFromQueue();
+    void displayCrowdQueue();
 };
 
 // Stack methods
@@ -64,6 +67,18 @@ string Stack::top() {
 
 bool Stack::empty() {
     return stack.empty();
+}
+
+void Stack::display() {
+    if (stack.empty()) {
+        cout << "Stack is empty." << endl;
+    } else {
+        cout << "Stack contents: ";
+        for (auto it = stack.rbegin(); it != stack.rend(); ++it) {
+            cout << *it << " ";
+        }
+        cout << endl;
+    }
 }
 
 // Graph methods
@@ -187,6 +202,10 @@ void CrowdControl::removePersonFromStack() {
     }
 }
 
+void CrowdControl::displayCrowdStack() {
+    crowdStack.display();
+}
+
 void CrowdControl::addPersonToQueue(string name) {
     crowdQueue.push(name);
     cout << name << " added to Queue." << endl;
@@ -198,6 +217,20 @@ void CrowdControl::removePersonFromQueue() {
         crowdQueue.pop();
     } else {
         cout << "No one in the Queue." << endl;
+    }
+}
+
+void CrowdControl::displayCrowdQueue() {
+    if (crowdQueue.empty()) {
+        cout << "Queue is empty." << endl;
+    } else {
+        cout << "Queue contents: ";
+        queue<string> tempQueue = crowdQueue;
+        while (!tempQueue.empty()) {
+            cout << tempQueue.front() << " ";
+            tempQueue.pop();
+        }
+        cout << endl;
     }
 }
 
@@ -220,9 +253,11 @@ int main() {
         cout << "4. Ambulance Route Optimization (Enter starting and destination locations, e.g., Hospital and Accident Site)" << endl;
         cout << "5. Add Person to Crowd Stack (Enter name of person)" << endl;
         cout << "6. Remove Person from Crowd Stack" << endl;
-        cout << "7. Add Person to Crowd Queue (Enter name of person)" << endl;
-        cout << "8. Remove Person from Crowd Queue" << endl;
-        cout << "9. Exit" << endl;
+        cout << "7. Display Crowd Stack" << endl;
+        cout << "8. Add Person to Crowd Queue (Enter name of person)" << endl;
+        cout << "9. Remove Person from Crowd Queue" << endl;
+        cout << "10. Display Crowd Queue" << endl;
+        cout << "11. Exit" << endl;
         cout << "Enter your choice: ";
         cin >> choice;
 
@@ -269,7 +304,11 @@ int main() {
             crowdControl.removePersonFromStack();
             break;
 
-        case 7: {
+        case 7:
+            crowdControl.displayCrowdStack();
+            break;
+
+        case 8: {
             string name;
             cout << "Enter person name to add to Queue: ";
             cin >> name;
@@ -277,18 +316,22 @@ int main() {
             break;
         }
 
-        case 8:
+        case 9:
             crowdControl.removePersonFromQueue();
             break;
 
-        case 9:
+        case 10:
+            crowdControl.displayCrowdQueue();
+            break;
+
+        case 11:
             cout << "Exiting Emergency Services System." << endl;
             break;
 
         default:
             cout << "Invalid choice!" << endl;
         }
-    } while (choice != 9);
+    } while (choice != 11);
 
     return 0;
 }
