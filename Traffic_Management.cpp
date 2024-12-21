@@ -19,7 +19,9 @@ class Vehicles{
 
     void displayInfo(){
         cout<<" <-- ID: "<<id;
-        cout<<" Type: "<<type;
+        // cout<<" Type: "<<type;
+        // cout << "Number: ";
+        // cout << "Number: ";
     }
     
 };
