@@ -17,6 +17,7 @@ public:
     void pop();
     string top();
     bool empty();
+    void clear();
     void display();
 };
 
@@ -41,9 +42,11 @@ class CrowdControl {
 public:
     void addPersonToStack(string name);
     void removePersonFromStack();
+    void emptyCrowdStack();
     void displayCrowdStack();
     void addPersonToQueue(string name);
     void removePersonFromQueue();
+    void emptyCrowdQueue();
     void displayCrowdQueue();
 };
 
@@ -67,6 +70,10 @@ string Stack::top() {
 
 bool Stack::empty() {
     return stack.empty();
+}
+
+void Stack::clear() {
+    stack.clear();
 }
 
 void Stack::display() {
@@ -202,6 +209,11 @@ void CrowdControl::removePersonFromStack() {
     }
 }
 
+void CrowdControl::emptyCrowdStack() {
+    crowdStack.clear();
+    cout << "Crowd Stack has been emptied." << endl;
+}
+
 void CrowdControl::displayCrowdStack() {
     crowdStack.display();
 }
@@ -218,6 +230,13 @@ void CrowdControl::removePersonFromQueue() {
     } else {
         cout << "No one in the Queue." << endl;
     }
+}
+
+void CrowdControl::emptyCrowdQueue() {
+    while (!crowdQueue.empty()) {
+        crowdQueue.pop();
+    }
+    cout << "Crowd Queue has been emptied." << endl;
 }
 
 void CrowdControl::displayCrowdQueue() {
@@ -257,7 +276,9 @@ int main() {
         cout << "8. Add Person to Crowd Queue (Enter name of person)" << endl;
         cout << "9. Remove Person from Crowd Queue" << endl;
         cout << "10. Display Crowd Queue" << endl;
-        cout << "11. Exit" << endl;
+        cout << "11. Empty Crowd Stack" << endl;
+        cout << "12. Empty Crowd Queue" << endl;
+        cout << "13. Exit" << endl;
         cout << "Enter your choice: ";
         cin >> choice;
 
@@ -325,13 +346,21 @@ int main() {
             break;
 
         case 11:
+            crowdControl.emptyCrowdStack();
+            break;
+
+        case 12:
+            crowdControl.emptyCrowdQueue();
+            break;
+
+        case 13:
             cout << "Exiting Emergency Services System." << endl;
             break;
 
         default:
             cout << "Invalid choice!" << endl;
         }
-    } while (choice != 11);
+    } while (choice != 13);
 
     return 0;
 }
