@@ -1,10 +1,20 @@
 #include <iostream>
 #include <vector>
 #include <queue>
-#include <unordered_map>
+#include <string>
 #include <climits>
 
 using namespace std;
+
+// Helper function to find the index of a node in the graph
+int findNodeIndex(const vector<string>& nodes, const string& node) {
+    for (size_t i = 0; i < nodes.size(); ++i) {
+        if (nodes[i] == node) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 // Function prototypes
 class Stack;
@@ -24,7 +34,8 @@ public:
 };
 
 class Graph {
-    unordered_map<string, vector<pair<string, int>>> adjList;
+    vector<string> nodes;
+    vector<vector<pair<int, int>>> adjList;
 
 public:
     void addEdge(string u, string v, int weight);
@@ -34,7 +45,7 @@ public:
     void ambulanceRouteOptimization(string start, string end);
 
 private:
-    void dfsUtil(string node, unordered_map<string, bool>& visited);
+    void dfsUtil(int nodeIndex, vector<bool>& visited);
 };
 
 class CrowdControl {
@@ -92,35 +103,55 @@ void Stack::display() {
 
 // Graph methods
 void Graph::addEdge(string u, string v, int weight) {
-    adjList[u].push_back({v, weight});
-    adjList[v].push_back({u, weight});
+    int uIndex = findNodeIndex(nodes, u);
+    if (uIndex == -1) {
+        nodes.push_back(u);
+        adjList.push_back({});
+        uIndex = nodes.size() - 1;
+    }
+
+    int vIndex = findNodeIndex(nodes, v);
+    if (vIndex == -1) {
+        nodes.push_back(v);
+        adjList.push_back({});
+        vIndex = nodes.size() - 1;
+    }
+
+    adjList[uIndex].push_back({vIndex, weight});
+    adjList[vIndex].push_back({uIndex, weight});
 }
 
 void Graph::displayGraph() {
     cout << "Graph Representation:" << endl;
-    for (auto& node : adjList) {
-        cout << node.first << " -> ";
-        for (auto& neighbor : node.second) {
-            cout << "(" << neighbor.first << ", " << neighbor.second << ") ";
+    for (size_t i = 0; i < nodes.size(); ++i) {
+        cout << nodes[i] << " -> ";
+        for (auto& neighbor : adjList[i]) {
+            cout << "(" << nodes[neighbor.first] << ", " << neighbor.second << ") ";
         }
         cout << endl;
     }
 }
 
 void Graph::bfs(string start) {
-    queue<string> q;
-    unordered_map<string, bool> visited;
+    int startIndex = findNodeIndex(nodes, start);
+    if (startIndex == -1) {
+        cout << "Start node not found in graph." << endl;
+        return;
+    }
 
-    q.push(start);
-    visited[start] = true;
+    queue<int> q;
+    vector<bool> visited(nodes.size(), false);
+
+    q.push(startIndex);
+    visited[startIndex] = true;
 
     cout << "BFS Traversal starting from " << start << ": ";
     while (!q.empty()) {
-        string node = q.front();
+        int nodeIndex = q.front();
         q.pop();
-        cout << node << " ";
+        cout << nodes[nodeIndex] << " ";
 
-        for (auto& neighbor : adjList[node]) {
+        for (auto& neighbor : adjList[nodeIndex]) {
             if (!visited[neighbor.first]) {
                 visited[neighbor.first] = true;
                 q.push(neighbor.first);
@@ -130,11 +161,11 @@ void Graph::bfs(string start) {
     cout << endl;
 }
 
-void Graph::dfsUtil(string node, unordered_map<string, bool>& visited) {
-    cout << node << " ";
-    visited[node] = true;
+void Graph::dfsUtil(int nodeIndex, vector<bool>& visited) {
+    cout << nodes[nodeIndex] << " ";
+    visited[nodeIndex] = true;
 
-    for (auto& neighbor : adjList[node]) {
+    for (auto& neighbor : adjList[nodeIndex]) {
         if (!visited[neighbor.first]) {
             dfsUtil(neighbor.first, visited);
         }
@@ -142,29 +173,40 @@ void Graph::dfsUtil(string node, unordered_map<string, bool>& visited) {
 }
 
 void Graph::dfs(string start) {
-    unordered_map<string, bool> visited;
+    int startIndex = findNodeIndex(nodes, start);
+    if (startIndex == -1) {
+        cout << "Start node not found in graph." << endl;
+        return;
+    }
+
+    vector<bool> visited(nodes.size(), false);
     cout << "DFS Traversal starting from " << start << ": ";
-    dfsUtil(start, visited);
+    dfsUtil(startIndex, visited);
     cout << endl;
 }
 
 void Graph::ambulanceRouteOptimization(string start, string end) {
-    unordered_map<string, int> distance;
-    unordered_map<string, string> parent;
-    for (auto& node : adjList) {
-        distance[node.first] = INT_MAX;
-    }
-    distance[start] = 0;
+    int startIndex = findNodeIndex(nodes, start);
+    int endIndex = findNodeIndex(nodes, end);
 
-    priority_queue<pair<int, string>, vector<pair<int, string>>, greater<pair<int, string>>> pq;
-    pq.push({0, start});
+    if (startIndex == -1 || endIndex == -1) {
+        cout << "Start or end node not found in graph." << endl;
+        return;
+    }
+
+    vector<int> distance(nodes.size(), INT_MAX);
+    vector<int> parent(nodes.size(), -1);
+    distance[startIndex] = 0;
+
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    pq.push({0, startIndex});
 
     while (!pq.empty()) {
-        string current = pq.top().second;
+        int current = pq.top().second;
         int currentDist = pq.top().first;
         pq.pop();
 
-        if (current == end) break;
+        if (current == endIndex) break;
 
         for (auto& neighbor : adjList[current]) {
             int newDist = currentDist + neighbor.second;
@@ -176,23 +218,22 @@ void Graph::ambulanceRouteOptimization(string start, string end) {
         }
     }
 
-    if (distance[end] == INT_MAX) {
+    if (distance[endIndex] == INT_MAX) {
         cout << "No route found from " << start << " to " << end << endl;
     } else {
         cout << "Optimized Route (Ambulance): ";
-        string node = end;
         Stack path;
-        while (node != start) {
-            path.push(node);
+        int node = endIndex;
+        while (node != -1) {
+            path.push(nodes[node]);
             node = parent[node];
         }
-        path.push(start);
         while (!path.empty()) {
             cout << path.top();
             path.pop();
             if (!path.empty()) cout << " -> ";
         }
-        cout << " | Distance: " << distance[end] << endl;
+        cout << " | Distance: " << distance[endIndex] << endl;
     }
 }
 
@@ -377,8 +418,9 @@ int main() {
 
         default:
             cout << "Invalid choice!" << endl;
-        }
-    } while (choice != 13);
+            }
+        } while (choice != 13);
 
-    return 0;
-}
+        return 0;
+    }
+   
