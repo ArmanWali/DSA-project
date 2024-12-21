@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream> // For file handling
 using namespace std;
 
 class Vehicles{
@@ -62,17 +63,26 @@ class ListQue{
     } 
 
     void Dequeue() {
-    if (front == nullptr) {
-        cout << "The queue is empty" << endl;
-        return;
+        if (front == nullptr) {
+            cout << "The queue is empty" << endl;
+            return;
+        }
+        Node* temp = front;
+        ofstream file("passed_vehicles.txt", ios::app);
+        if (file.is_open()) {
+            file << temp->data.id << endl; // Log the ID of the removed vehicle
+            file.close();
+        } else {
+            cout << "Error: Unable to open the file for logging vehicle IDs." << endl;
+        }
+
+        cout << "Removing Vehicle ID: " << temp->data.id << " from the lane." << endl; // Added message
+        front = front->next;
+        delete temp;
+        if (front == nullptr) { // Reset rear if queue is empty after dequeue
+            rear = nullptr;
+        }
     }
-    Node* temp = front;
-    front = front->next;
-    delete temp;
-    if (front == nullptr) {  // Reset rear if queue is empty after dequeue
-        rear = nullptr;
-    }
-}
 
     void Display(){
         Node* temp = front;
@@ -134,7 +144,7 @@ class ArrayQue{
     }
 
     bool isFull(){
-        return (rear == 5-1); 
+        return (rear == size - 1); 
     }
 
     bool isEmpty(){
@@ -154,19 +164,26 @@ class ArrayQue{
         arr[++rear] = value; 
     }
 
-    void Dequeue(){
-        if (isEmpty()){
-            cout<<"The Lane is already Empty!"<<endl;
-            return;
-        }
-        
-        if (front == rear){
-            front = rear = -1;
-        }
-        else{
-            front++;
-        }
+    void Dequeue() {
+    if (isEmpty()) {
+        cout << "The Lane is already Empty!" << endl;
+        return;
     }
+    ofstream file("passed_vehicles.txt", ios::app);
+        if (file.is_open()) {
+            file << arr[front].id << endl;
+            file.close();
+        } else {
+            cout << "Error: Unable to open the file for logging vehicle IDs." << endl;
+        }
+
+    cout << "Removing Vehicle ID: " << arr[front].id << " from the lane." << endl; // Added message
+    if (front == rear) {
+        front = rear = -1;
+    } else {
+        front++;
+    }
+}
 
     void Display(){
         for (int i = front; i <= rear; i++){
@@ -185,24 +202,26 @@ class TrafficSignal{
         duration = 10;
     }
 
-    void changeSignal(int elapsedTime){
-        duration -= elapsedTime;
-
-        if (duration <= 0){
-            if (state == "Red"){
+    void changeSignal(int elapsedTime) {
+        while (elapsedTime > 0) {
+            if (elapsedTime < duration) {
+                duration -= elapsedTime;
+                break;
+            }
+            elapsedTime -= duration;
+            if (state == "Red") {
                 state = "Green";
                 duration = 15;
-            }
-            else if (state == "Green"){
+            } else if (state == "Green") {
                 state = "Yellow";
                 duration = 5;
-            }
-            else if (state == "Yellow"){
+            } else if (state == "Yellow") {
                 state = "Red";
                 duration = 10;
-            }    
-        }  
-    }
+            }
+        }
+}
+
 
     void displaySignal() {
         cout << "Signal: " << state << " | Remaining Duration: " << duration << " seconds" << endl;
@@ -234,17 +253,25 @@ public:
     }
 
     void setInputMode() {
-        cout << "1. Use Linked List." << endl;
-        cout << "2. Use Array." << endl;
-        cout << "Enter choice: ";
-        cin >> inputMode;
-        if (inputMode != 1 && inputMode != 2) {
-            cout << "Invalid choice. Defaulting to Linked List." << endl;
-            inputMode = 1;
-        }
+    cout << "1. Use Linked List." << endl;
+    cout << "2. Use Array." << endl;
+    cout << "Enter choice: ";
+    cin >> inputMode;
+    if (inputMode != 1 && inputMode != 2) {
+        cout << "Invalid choice. Defaulting to Linked List." << endl;
+        inputMode = 1;
+    } else {
+        cout << (inputMode == 1 ? "Using Linked List" : "Using Array") << " for lane management." << endl;
     }
+}
+
 
     void AddVehiclesToLane(Vehicles vehicle) {
+
+        if (vehicle.type != "Truck" && vehicle.type != "Car" && vehicle.type != "Bike") {
+        cout << "Invalid vehicle type. Please enter Truck, Car, or Bike." << endl;
+        return;
+    }
         if (inputMode == 1) {
             if (vehicle.type == "Truck") {
                 TruckLane_list.Enqueue(vehicle);
@@ -353,6 +380,7 @@ public:
 };
 
 int main() {
+    system("CLS");
     Road road;
     road.setInputMode();
 
@@ -391,13 +419,14 @@ int main() {
             road.DisplayAllLanes();
             break;
 
-        case 4: {
-            int elapsedTime;
-            cout << "Enter elapsed time in seconds: ";
-            cin >> elapsedTime;
-            road.updateAllSignals(elapsedTime);
-            break;
-        }
+        case 4: { 
+        int elapsedTime; 
+        cout << "Enter elapsed time in seconds to update signals: "; 
+        cin >> elapsedTime; 
+        road.updateAllSignals(elapsedTime); 
+        cout << "Signals updated!" << endl; 
+        break; 
+    }
         case 5:
             road.displayAllSignals();
             break;
