@@ -2,6 +2,8 @@
 #include <vector>
 #include <queue>
 #include <unordered_map>
+#include <climits>
+
 using namespace std;
 
 // Function prototypes
@@ -210,7 +212,16 @@ void CrowdControl::removePersonFromStack() {
 }
 
 void CrowdControl::emptyCrowdStack() {
-    crowdStack.clear();
+    if (!crowdStack.empty()) {
+        cout << "People removed from Stack in order: ";
+        while (!crowdStack.empty()) {
+            cout << crowdStack.top() << " ";
+            crowdStack.pop();
+        }
+        cout << endl;
+    } else {
+        cout << "Crowd Stack is already empty." << endl;
+    }
     cout << "Crowd Stack has been emptied." << endl;
 }
 
@@ -233,8 +244,15 @@ void CrowdControl::removePersonFromQueue() {
 }
 
 void CrowdControl::emptyCrowdQueue() {
-    while (!crowdQueue.empty()) {
-        crowdQueue.pop();
+    if (!crowdQueue.empty()) {
+        cout << "People removed from Queue in order: ";
+        while (!crowdQueue.empty()) {
+            cout << crowdQueue.front() << " ";
+            crowdQueue.pop();
+        }
+        cout << endl;
+    } else {
+        cout << "Crowd Queue is already empty." << endl;
     }
     cout << "Crowd Queue has been emptied." << endl;
 }
